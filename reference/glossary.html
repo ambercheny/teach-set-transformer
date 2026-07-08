@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Set Transformer Glossary</title>
+    <link rel="stylesheet" href="../assets/course.css">
+  </head>
+  <body>
+    <main>
+      <article>
+        <header>
+          <p class="kicker">Reference</p>
+          <h1>Set Transformer Glossary</h1>
+          <p class="lede">
+            A compact vocabulary for learning why Set Transformer fits unordered flow cytometry event data and how it produces sample-level predictions.
+          </p>
+        </header>
+
+        <section aria-labelledby="data-terms">
+          <h2 id="data-terms">Data Terms</h2>
+
+          <table>
+            <caption>Terms for the Flow-RBC framing.</caption>
+            <thead>
+              <tr>
+                <th>Term</th>
+                <th>Meaning</th>
+                <th>Use it when</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Set</strong></td>
+                <td>A collection where the elements have no meaningful order.</td>
+                <td>You want to say that shuffling rows should not change the sample-level prediction.</td>
+              </tr>
+              <tr>
+                <td><strong>Sequence</strong></td>
+                <td>A collection where order carries information, such as words in a sentence or time points in a time series.</td>
+                <td>You want to contrast Set Transformer with models that treat position as meaningful.</td>
+              </tr>
+              <tr>
+                <td><strong>Flow cytometry event</strong></td>
+                <td>One detected particle measurement. In this teaching workspace, after preprocessing, one retained event is treated as one cell row.</td>
+                <td>You want to explain why the model input can be represented as rows of per-cell measurements.</td>
+              </tr>
+              <tr>
+                <td><strong>Cell-event row</strong></td>
+                <td>One row in the model input table, containing measured features for a retained event/cell.</td>
+                <td>You want a concrete mental model: one row equals one element in the input set.</td>
+              </tr>
+              <tr>
+                <td><strong>Sample</strong></td>
+                <td>The whole blood sample or patient-level example, represented by many event rows.</td>
+                <td>You want to distinguish the model input set from the individual rows inside it.</td>
+              </tr>
+              <tr>
+                <td><strong>Sample-level prediction</strong></td>
+                <td>A prediction for the entire set, not for an individual event row.</td>
+                <td>You are describing hematocrit prediction from many RBC measurements.</td>
+              </tr>
+              <tr>
+                <td><strong>Event-level representation</strong></td>
+                <td>A learned vector for each event row after the encoder processes the set.</td>
+                <td>You are tracking how the encoder keeps one output representation per input event.</td>
+              </tr>
+              <tr>
+                <td><strong>Hematocrit</strong></td>
+                <td>The fraction of blood volume occupied by red blood cells.</td>
+                <td>You are describing the Flow-RBC prediction target from Zhang 2022.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section aria-labelledby="symmetry-terms">
+          <h2 id="symmetry-terms">Symmetry Terms</h2>
+
+          <div class="grid">
+            <section class="panel">
+              <h3>Permutation</h3>
+              <p>A reordering of the elements in a set. For a table of event rows, a permutation means the same rows appear in a different order.</p>
+            </section>
+
+            <section class="panel">
+              <h3>Permutation Invariant</h3>
+              <p>A function is permutation invariant when reordering the input elements does not change the output.</p>
+              <p class="formula">f([a, b, c]) = f([c, a, b])</p>
+            </section>
+
+            <section class="panel">
+              <h3>Permutation Equivariant</h3>
+              <p>A function is permutation equivariant when reordering the input elements reorders the output elements in the same way.</p>
+              <p class="formula">g([a, b, c]) = [A, B, C]<br>g([c, a, b]) = [C, A, B]</p>
+            </section>
+          </div>
+
+          <div class="callout">
+            <strong>Rule of thumb</strong>
+            Invariant means "same answer after shuffling." Equivariant means "same per-element answers, shuffled the same way."
+          </div>
+        </section>
+
+        <section aria-labelledby="architecture-terms">
+          <h2 id="architecture-terms">Architecture Terms</h2>
+
+          <table>
+            <caption>Terms for Deep Sets and Set Transformer.</caption>
+            <thead>
+              <tr>
+                <th>Term</th>
+                <th>Meaning</th>
+                <th>Why it matters</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Deep Sets</strong></td>
+                <td>A baseline architecture that encodes each set element, pools across elements, then decodes the pooled vector.</td>
+                <td>It is the simplest reference point for permutation-invariant neural networks.</td>
+              </tr>
+              <tr>
+                <td><strong>Pooling</strong></td>
+                <td>An aggregation operation such as sum, mean, or max across event representations.</td>
+                <td>Pooling can make a model invariant, but simple pooling may discard useful interactions between elements.</td>
+              </tr>
+              <tr>
+                <td><strong>Attention</strong></td>
+                <td>A weighted lookup mechanism: a query scores keys, then uses those scores to combine values.</td>
+                <td>It lets the model emphasize different event rows depending on the context of the set.</td>
+              </tr>
+              <tr>
+                <td><strong>Query</strong></td>
+                <td>The vector asking what information is relevant.</td>
+                <td>Use it when explaining which element or seed is doing the lookup.</td>
+              </tr>
+              <tr>
+                <td><strong>Key</strong></td>
+                <td>The vector being compared against a query.</td>
+                <td>Use it when explaining how attention scores are computed.</td>
+              </tr>
+              <tr>
+                <td><strong>Value</strong></td>
+                <td>The vector being combined after attention weights are computed.</td>
+                <td>Use it when explaining what information flows to the output.</td>
+              </tr>
+              <tr>
+                <td><strong>MAB</strong></td>
+                <td>Multihead Attention Block. The reusable attention block behind Set Transformer components.</td>
+                <td>SAB, ISAB, and PMA are built from MAB.</td>
+              </tr>
+              <tr>
+                <td><strong>SAB</strong></td>
+                <td>Set Attention Block. A self-attention block where the set attends to itself.</td>
+                <td>It creates event-level representations that can include interactions with other events.</td>
+              </tr>
+              <tr>
+                <td><strong>ISAB</strong></td>
+                <td>Induced Set Attention Block. A scalable attention block that uses learned inducing points.</td>
+                <td>It reduces attention cost from comparing all event pairs to comparing events through a smaller learned bottleneck.</td>
+              </tr>
+              <tr>
+                <td><strong>Inducing point</strong></td>
+                <td>A learned vector used by ISAB as an intermediate representation for summarizing set structure.</td>
+                <td>It helps the model scale when the number of events is large.</td>
+              </tr>
+              <tr>
+                <td><strong>PMA</strong></td>
+                <td>Pooling by Multihead Attention. A learned pooling operation using seed vectors as queries.</td>
+                <td>It is where Set Transformer turns event-level representations into set-level outputs.</td>
+              </tr>
+              <tr>
+                <td><strong>Seed vector</strong></td>
+                <td>A learned query vector used by PMA to ask for a summary of the set.</td>
+                <td>One seed can produce one sample-level output representation; multiple seeds can produce multiple related outputs.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section aria-labelledby="zhang-terms">
+          <h2 id="zhang-terms">Zhang 2022 Terms</h2>
+
+          <table>
+            <caption>Terms for deep permutation-invariant model stability.</caption>
+            <thead>
+              <tr>
+                <th>Term</th>
+                <th>Meaning</th>
+                <th>Why it matters</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Gradient vanishing</strong></td>
+                <td>Gradients become too small as they flow backward through many layers.</td>
+                <td>Earlier layers may learn slowly or stop learning in deep models.</td>
+              </tr>
+              <tr>
+                <td><strong>Gradient exploding</strong></td>
+                <td>Gradients become too large as they flow backward through many layers.</td>
+                <td>Training can become unstable, especially in deeper Set Transformer variants.</td>
+              </tr>
+              <tr>
+                <td><strong>Residual connection</strong></td>
+                <td>A connection that adds a block input back to a block output.</td>
+                <td>It helps gradients flow through deep networks.</td>
+              </tr>
+              <tr>
+                <td><strong>Clean path</strong></td>
+                <td>A residual path where the input is added back without being transformed first.</td>
+                <td>Zhang 2022 uses this idea to improve deep permutation-invariant architectures.</td>
+              </tr>
+              <tr>
+                <td><strong>Layer norm</strong></td>
+                <td>A normalization method that standardizes features within each element representation.</td>
+                <td>It can remove scale information that may matter for real-valued set data.</td>
+              </tr>
+              <tr>
+                <td><strong>Set norm</strong></td>
+                <td>A normalization method designed for set inputs, standardizing at the set level while preserving permutation behavior.</td>
+                <td>It is Zhang 2022's alternative to layer norm for permutation-invariant models on set data.</td>
+              </tr>
+              <tr>
+                <td><strong>Set Transformer++</strong></td>
+                <td>A modified Set Transformer using clean-path residual connections and set norm.</td>
+                <td>It is the Zhang 2022 version aimed at training deeper set models more reliably.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section aria-labelledby="fast-check">
+          <h2 id="fast-check">Fast Check</h2>
+
+          <div class="exercise">
+            <h3>Classify each function</h3>
+            <ol>
+              <li><code>mean([x1, x2, x3])</code>: invariant, equivariant, or order-sensitive?</li>
+              <li><code>[h(x1), h(x2), h(x3)]</code> with the same <code>h</code> applied to every row: invariant, equivariant, or order-sensitive?</li>
+              <li>A model that reads event rows one at a time and uses row position as a feature: invariant, equivariant, or order-sensitive?</li>
+            </ol>
+            <p><strong>Answers:</strong> invariant; equivariant; order-sensitive.</p>
+          </div>
+        </section>
+
+        <p class="source-note">
+          Sources: Lee et al. 2019 for Set Transformer, permutation invariance/equivariance, MAB, SAB, ISAB, and PMA; Zhang et al. 2022 for Flow-RBC, clean-path residual connections, layer norm concerns, set norm, and Set Transformer++.
+        </p>
+      </article>
+    </main>
+  </body>
+</html>
