@@ -2,6 +2,10 @@
 
 This workspace is for teaching Set Transformer in the context of unordered flow cytometry cell-event data and RBC prediction.
 
+## Interactive Page
+
+[Open the live teaching site at https://ambercheny.github.io/teach-set-transformer/](https://ambercheny.github.io/teach-set-transformer/)
+
 ## Mission
 
 The learner wants to understand Set Transformer well enough to explain why it fits unordered flow cytometry cell-event data and evaluate whether it is appropriate for RBC prediction.
