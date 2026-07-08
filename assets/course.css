@@ -274,6 +274,211 @@ button.secondary,
   margin-top: 28px;
 }
 
+.flow-diagram {
+  background: #f9f8f1;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  margin: 24px 0;
+  padding: 18px;
+}
+
+.flow-machine {
+  align-items: center;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr 2fr 1fr;
+  min-height: 300px;
+}
+
+.flow-label {
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.flow-laser,
+.flow-detector {
+  align-items: center;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+  min-height: 118px;
+  padding: 14px;
+}
+
+.flow-beam {
+  background: linear-gradient(90deg, transparent, #f2c94c 20%, #f2c94c 80%, transparent);
+  height: 12px;
+  width: 100%;
+}
+
+.flow-tube-wrap {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  min-height: 260px;
+  position: relative;
+}
+
+.flow-tube {
+  align-items: center;
+  background: rgba(31, 111, 120, 0.08);
+  border: 2px solid var(--accent);
+  border-radius: 999px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 235px;
+  justify-content: center;
+  padding: 18px 0;
+  position: relative;
+  width: 58px;
+}
+
+.flow-tube::before,
+.flow-tube::after {
+  color: var(--accent-dark);
+  font-size: 1.2rem;
+  position: absolute;
+  transform: rotate(90deg);
+}
+
+.flow-tube::before {
+  content: "->";
+  top: -30px;
+}
+
+.flow-tube::after {
+  content: "->";
+  bottom: -30px;
+}
+
+.flow-cell {
+  border: 2px solid rgba(31, 35, 40, 0.25);
+  border-radius: 50%;
+  height: 26px;
+  width: 26px;
+}
+
+.flow-cell.red {
+  background: #d95c49;
+}
+
+.flow-cell.white {
+  background: #f3efe2;
+}
+
+.flow-cell.platelet {
+  background: #8ab6d6;
+  height: 18px;
+  width: 18px;
+}
+
+.flow-light-crossing {
+  background: rgba(242, 201, 76, 0.38);
+  height: 18px;
+  left: 8%;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 84%;
+}
+
+.flow-diagram-note {
+  color: var(--muted);
+  font-size: 0.92rem;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.pooling-diagram {
+  background: #f9f8f1;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  margin: 24px 0;
+  padding: 18px;
+}
+
+.pooling-flow {
+  align-items: center;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(260px, 1.5fr) auto minmax(220px, 1fr);
+}
+
+.feature-matrix,
+.pooled-vector {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.feature-matrix h3,
+.pooled-vector h3 {
+  margin-top: 0;
+}
+
+.matrix-grid {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 64px repeat(4, minmax(44px, 1fr));
+  margin-top: 12px;
+}
+
+.matrix-cell {
+  background: var(--code);
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.82rem;
+  min-height: 34px;
+  padding: 7px 6px;
+  text-align: center;
+}
+
+.matrix-cell.heading {
+  background: #eeece3;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.matrix-cell.row-label {
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-weight: 700;
+}
+
+.pooling-arrow {
+  color: var(--accent-dark);
+  font-weight: 800;
+  text-align: center;
+}
+
+.pooling-arrow .arrow {
+  display: block;
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.vector-grid {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(4, minmax(44px, 1fr));
+  margin-top: 12px;
+}
+
+.dimension-note {
+  color: var(--muted);
+  font-size: 0.92rem;
+  margin-top: 12px;
+}
+
 @media (max-width: 640px) {
   main,
   .page {
@@ -288,6 +493,27 @@ button.secondary,
   th,
   td {
     padding: 8px;
+  }
+
+  .flow-machine {
+    grid-template-columns: 1fr;
+  }
+
+  .flow-tube::before,
+  .flow-tube::after {
+    display: none;
+  }
+
+  .pooling-flow {
+    grid-template-columns: 1fr;
+  }
+
+  .pooling-arrow .arrow {
+    transform: rotate(90deg);
+  }
+
+  .matrix-grid {
+    grid-template-columns: 52px repeat(4, minmax(38px, 1fr));
   }
 }
 

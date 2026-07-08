@@ -43,11 +43,6 @@
     return next;
   }
 
-  function rotate(rows) {
-    if (rows.length < 2) return cloneRows(rows);
-    return rows.slice(1).concat(rows[0]);
-  }
-
   function renderTable(container, rows) {
     container.innerHTML = "";
 
@@ -120,17 +115,12 @@
     shuffleButton.type = "button";
     shuffleButton.textContent = "Shuffle rows";
 
-    const rotateButton = document.createElement("button");
-    rotateButton.type = "button";
-    rotateButton.className = "secondary";
-    rotateButton.textContent = "Rotate rows";
-
     const resetButton = document.createElement("button");
     resetButton.type = "button";
     resetButton.className = "secondary";
     resetButton.textContent = "Reset rows";
 
-    controls.append(shuffleButton, rotateButton, resetButton);
+    controls.append(shuffleButton, resetButton);
 
     const tableMount = document.createElement("div");
     const outputMount = document.createElement("div");
@@ -145,11 +135,6 @@
 
     shuffleButton.addEventListener("click", () => {
       rows = shuffle(rows);
-      render();
-    });
-
-    rotateButton.addEventListener("click", () => {
-      rows = rotate(rows);
       render();
     });
 

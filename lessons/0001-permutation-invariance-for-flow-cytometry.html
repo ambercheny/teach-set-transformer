@@ -15,10 +15,11 @@
           <p class="kicker">Lesson 1</p>
           <h1>Permutation Invariance For Flow Cytometry</h1>
           <p class="lede">
-            Learn the one symmetry that makes set models useful for flow cytometry: reordering cell-event rows should not change a sample-level prediction.
+            Learn the one symmetry that makes set models useful for flow cytometry: reordering cell rows should not change a sample-level prediction.
           </p>
         </header>
 
+        <!-- Orient the learner to the single skill this lesson teaches. -->
         <section aria-labelledby="win">
           <h2 id="win">The Win</h2>
           <p>
@@ -28,56 +29,58 @@
 
           <div class="callout">
             <strong>Vocabulary checkpoint</strong>
-            Keep <a href="../reference/glossary.html">the glossary</a> open if the words set, event, sample, invariant, or equivariant feel unstable.
+            Keep <a href="../reference/glossary.html" target="_blank">the glossary</a> open if the words set, event, sample, invariant, or equivariant feel unstable.
           </div>
         </section>
 
+        <!-- Establish the core contrast before introducing cytometry. -->
         <section aria-labelledby="set-not-sequence">
           <h2 id="set-not-sequence">Set, Not Sequence</h2>
           <p>
             A sequence has meaningful order. A sentence changes when its words are shuffled. A time series changes when its time points are shuffled.
+            <strong>A set has no meaningful order.</strong>
           </p>
-          <p>
-            A set has no meaningful order. If the same cell-event rows are listed in a different order, the blood sample is still the same sample.
-            For a sample-level RBC prediction, row order should not decide the answer.
-          </p>
-
-          <table>
-            <caption>Two views of the same kind of table.</caption>
-            <thead>
-              <tr>
-                <th>Input type</th>
-                <th>Order means something?</th>
-                <th>Model should care about row order?</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Sentence tokens</td>
-                <td>Yes</td>
-                <td>Yes</td>
-              </tr>
-              <tr>
-                <td>Time series measurements</td>
-                <td>Yes</td>
-                <td>Yes</td>
-              </tr>
-              <tr>
-                <td>Retained RBC event rows from one sample</td>
-                <td>No</td>
-                <td>No, not for a sample-level prediction</td>
-              </tr>
-            </tbody>
-          </table>
         </section>
 
-        <section aria-labelledby="event">
-          <h2 id="event">What An Event Represents</h2>
+        <!-- Flow cytometry context: enough domain framing to motivate set models. -->
+        <section aria-labelledby="flow-cytometry-set-data">
+          <h2 id="flow-cytometry-set-data">Flow Cytometry As Set Data</h2>
           <p>
-            A flow cytometry event is one detected particle measurement. In this teaching workspace, after preprocessing, one retained event is treated as one cell row.
+            Flow cytometry data is naturally set-like. At a high level, flow cytometry aligns particles or cells in a single stream, sends light from an optical source such as a laser through or around each passing particle, and records the resulting signal with detectors. Those signals become per-cell measurements that can be used to characterize cells or particles. In flow cytometry literature, sometimes we refer to a cell measurement as an event. For simplicity, we refer to cells.
+          </p>
+
+          <div class="flow-diagram" role="img" aria-label="Conceptual flow cytometry diagram showing cells aligned in a tube, a light source crossing the stream, and a detector collecting signal.">
+            <div class="flow-machine">
+              <div class="flow-laser">
+                <div class="flow-label">Light source</div>
+                <div class="flow-beam"></div>
+                <div>laser</div>
+              </div>
+
+              <div class="flow-tube-wrap">
+                <div class="flow-light-crossing"></div>
+                <div class="flow-tube" aria-hidden="true">
+                  <span class="flow-cell red"></span>
+                  <span class="flow-cell white"></span>
+                  <span class="flow-cell red"></span>
+                  <span class="flow-cell platelet"></span>
+                  <span class="flow-cell red"></span>
+                </div>
+              </div>
+
+              <div class="flow-detector">
+                <div class="flow-label">Detector</div>
+                <div>collected signal</div>
+              </div>
+            </div>
+            <p class="flow-diagram-note">Conceptual view: cells pass one at a time through the optical path; each retained event becomes one row of measurements.</p>
+          </div>
+
+          <p>
+            The order in which cells pass through the instrument has no canonical meaning for the sample. One run might observe a white cell before a red cell; another run might observe a red cell first. The interpretation should come from the collection of measured events, such as proportions, counts, and feature distributions, not from the arbitrary order of rows.
           </p>
           <p>
-            For the Flow-RBC framing in Zhang 2022, the useful abstraction is simple: one sample contains many RBC-level rows, each row has measured features, and the target is a sample-level hematocrit value.
+            In other words, if the same cell rows are listed in a different order, the blood sample is still the same sample. Hence, as in <a href="https://arxiv.org/abs/2206.11925" target="_blank" rel="noopener noreferrer">Zhang 2022</a>, for a sample-level RBC prediction, row order should not decide the answer.
           </p>
 
           <div class="callout warning">
@@ -86,18 +89,23 @@
           </div>
         </section>
 
+        <!-- Define the three possible behaviors under row reordering. -->
         <section aria-labelledby="three-behaviors">
           <h2 id="three-behaviors">Three Behaviors Under Shuffling</h2>
 
+          <p>
+            A permutation is a reordering of the elements. When you shuffle the same cell rows, a good sample-level model should behave in a predictable way.
+          </p>
+
           <div class="grid">
             <section class="panel">
-              <h3>Invariant</h3>
+              <h3>Permutation invariant</h3>
               <p>The output stays exactly the same when input rows are reordered.</p>
               <p class="formula">f([a, b, c]) = f([c, a, b])</p>
             </section>
 
             <section class="panel">
-              <h3>Equivariant</h3>
+              <h3>Permutation equivariant</h3>
               <p>The output rows reorder in the same way as the input rows.</p>
               <p class="formula">g([a, b, c]) = [A, B, C]<br>g([c, a, b]) = [C, A, B]</p>
             </section>
@@ -110,31 +118,110 @@
           </div>
         </section>
 
+        <!-- Bridge from the symmetry idea to neural-network architectures. -->
+        <section aria-labelledby="set-models">
+          <h2 id="set-models">What Are Set Models?</h2>
+          <p>
+            Set models are models designed for permutation-invariant or permutation-equivariant behavior. Deep Sets is the baseline architecture to understand first: it encodes each element, pools across elements, and then decodes the pooled representation.
+          </p>
+        </section>
+
+        <!-- Interactive demonstration: same rows, different order. -->
         <section aria-labelledby="demo">
           <h2 id="demo">Try It: Reorder The Same Events</h2>
           <p>
-            Shuffle or rotate the synthetic event rows below. The invariant sample summary should stay fixed because it ignores row order.
+            Shuffle the synthetic event rows below. The invariant sample summary should stay fixed because it ignores row order.
             The event-level scores should move with their event rows because they are equivariant.
           </p>
 
           <div class="exercise" data-permutation-demo></div>
         </section>
 
+        <!-- Deep Sets is the simplest architecture before Set Transformer. -->
         <section aria-labelledby="deep-sets">
           <h2 id="deep-sets">The Baseline: Deep Sets</h2>
           <p>
-            Lee 2019 presents the standard pooling pattern for set-input models: encode each element, pool across elements, then decode the pooled representation.
+            <a href="https://arxiv.org/abs/1703.06114" target="_blank" rel="noopener noreferrer">Zaheer 2017</a> presents the standard pooling pattern for set-input models: encode each element, pool across elements, then decode the pooled representation.
           </p>
 
           <p class="formula">prediction = decoder(pool(encoder(each event row)))</p>
+          <p>
+            More precisely, if each cell starts with four raw features, the encoder <code>phi</code> usually maps each row into <code>h</code> hidden features before pooling:
+            <code>n x 4 -> n x h -> 1 x h</code>. The visual below keeps the feature dimension as four for simplicity, so you can focus on the row dimension disappearing during pooling.
+          </p>
+
+          <div class="pooling-diagram" role="img" aria-label="Pooling diagram showing n cell rows with four features being pooled into one four-feature sample vector.">
+            <div class="pooling-flow">
+              <section class="feature-matrix">
+                <h3>Cell rows before pooling</h3>
+                <p class="source-note">Shape: <code>n x d</code>. Here, <code>n = 4</code> cells and <code>d = 4</code> features.</p>
+                <div class="matrix-grid" aria-hidden="true">
+                  <div class="matrix-cell heading">cell</div>
+                  <div class="matrix-cell heading">f1</div>
+                  <div class="matrix-cell heading">f2</div>
+                  <div class="matrix-cell heading">f3</div>
+                  <div class="matrix-cell heading">f4</div>
+
+                  <div class="matrix-cell row-label">c1</div>
+                  <div class="matrix-cell">82</div>
+                  <div class="matrix-cell">28</div>
+                  <div class="matrix-cell">41</div>
+                  <div class="matrix-cell">0.42</div>
+
+                  <div class="matrix-cell row-label">c2</div>
+                  <div class="matrix-cell">91</div>
+                  <div class="matrix-cell">32</div>
+                  <div class="matrix-cell">44</div>
+                  <div class="matrix-cell">0.55</div>
+
+                  <div class="matrix-cell row-label">c3</div>
+                  <div class="matrix-cell">76</div>
+                  <div class="matrix-cell">25</div>
+                  <div class="matrix-cell">38</div>
+                  <div class="matrix-cell">0.31</div>
+
+                  <div class="matrix-cell row-label">c4</div>
+                  <div class="matrix-cell">88</div>
+                  <div class="matrix-cell">30</div>
+                  <div class="matrix-cell">43</div>
+                  <div class="matrix-cell">0.49</div>
+                </div>
+              </section>
+
+              <div class="pooling-arrow" aria-hidden="true">
+                <span>mean / sum / max</span>
+                <span class="arrow">-></span>
+                <span>across cells</span>
+              </div>
+
+              <section class="pooled-vector">
+                <h3>Sample vector after pooling</h3>
+                <p class="source-note">Simplified shape: <code>d</code>. Pooling removes the row dimension but keeps the current feature dimension.</p>
+                <div class="vector-grid" aria-hidden="true">
+                  <div class="matrix-cell heading">f1</div>
+                  <div class="matrix-cell heading">f2</div>
+                  <div class="matrix-cell heading">f3</div>
+                  <div class="matrix-cell heading">f4</div>
+                  <div class="matrix-cell">84.25</div>
+                  <div class="matrix-cell">28.75</div>
+                  <div class="matrix-cell">41.50</div>
+                  <div class="matrix-cell">0.44</div>
+                </div>
+                <p class="dimension-note">
+                  This simplified visual pools raw four-feature rows directly. In a typical Deep Sets model, pooling happens after <code>phi</code>, so the pooled vector is <code>1 x h</code>.
+                </p>
+              </section>
+            </div>
+          </div>
 
           <p>
-            This gives the right symmetry for sample-level prediction: after pooling, the final answer does not depend on row order.
+            Pooling gives the right symmetry for sample-level prediction: after pooling, the final answer does not depend on row order.
             The limitation is that simple pooling can lose information about interactions between event rows.
             Set Transformer addresses that limitation by using attention, which is the topic of Lesson 2.
           </p>
         </section>
 
+        <!-- Retrieval practice: force the learner to classify examples. -->
         <section aria-labelledby="quiz">
           <h2 id="quiz">Check: Classify The Function</h2>
           <p>
@@ -170,6 +257,7 @@
           </div>
         </section>
 
+        <!-- End with a compact recall target for storage strength. -->
         <section aria-labelledby="final-check">
           <h2 id="final-check">Final Check</h2>
           <div class="exercise">
@@ -191,7 +279,7 @@
         </section>
 
         <p class="source-note">
-          Primary sources: Lee et al. 2019, Sections 1 and 2.1, for set-input motivation, permutation invariance, permutation equivariance, and pooling architectures; Zhang et al. 2022, Sections 1, 2, and 5, for Flow-RBC task framing and hematocrit prediction from RBC measurements. Ask the agent follow-up questions if any term or distinction is unclear.
+          Primary sources: <a href="https://arxiv.org/abs/1810.00825" target="_blank" rel="noopener noreferrer">Lee et al. 2019</a>, Sections 1 and 2.1, and <a href="https://arxiv.org/abs/1703.06114" target="_blank" rel="noopener noreferrer">Zaheer 2017</a>, Section 3.1, for set-input motivation, permutation invariance, permutation equivariance, and pooling architectures; <a href="https://arxiv.org/abs/2206.11925" target="_blank" rel="noopener noreferrer">Zhang et al. 2022</a>, Sections 1, 2, and 5, for Flow-RBC task framing and hematocrit prediction from RBC measurements. Ask the agent follow-up questions if any term or distinction is unclear.
         </p>
       </article>
     </main>
