@@ -1,5 +1,10 @@
 # Set Transformer Teaching Plan
 
+## TODO
+1. Teach clean paths
+2. Teach set norm for Flow-RBC
+
+
 This workspace is for teaching Set Transformer in the context of unordered flow cytometry cell-event data and RBC prediction.
 
 ## Mission

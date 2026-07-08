@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Set Transformer Course Home</title>
+    <link rel="stylesheet" href="assets/course.css">
+  </head>
+  <body>
+    <main>
+      <article>
+        <header>
+          <p class="kicker">Course Home</p>
+          <h1>Set Transformer For Flow Cytometry</h1>
+          <p class="lede">
+            A short teaching path for understanding why Set Transformer fits unordered cell-event data and how it produces sample-level RBC predictions.
+          </p>
+        </header>
+
+        <section aria-labelledby="start">
+          <h2 id="start">Start Here</h2>
+          <div class="grid">
+            <section class="panel">
+              <h3>Lesson 1</h3>
+              <p>
+                Learn why flow cytometry event rows should be treated as a set, and how to distinguish invariant, equivariant, and order-sensitive functions.
+              </p>
+              <p>
+                <a class="button" href="lessons/0001-permutation-invariance-for-flow-cytometry.html" target="_blank" rel="noopener noreferrer">Open Lesson 1</a>
+              </p>
+            </section>
+
+            <section class="panel">
+              <h3>Lesson 2</h3>
+              <p>
+                Trace Set Transformer from cell-event rows through attention, the encoder, PMA, and the final sample-level prediction head.
+              </p>
+              <p>
+                <a class="button" href="lessons/0002-how-set-transformer-builds-an-invariant-predictor.html" target="_blank" rel="noopener noreferrer">Open Lesson 2</a>
+              </p>
+            </section>
+          </div>
+        </section>
+
+        <section aria-labelledby="reference">
+          <h2 id="reference">References</h2>
+          <div class="grid">
+            <section class="panel">
+              <h3>Glossary</h3>
+              <p>
+                Definitions for set data, flow cytometry events, permutation invariance, attention, MAB, SAB, ISAB, and PMA.
+              </p>
+              <p>
+                <a class="button secondary" href="reference/glossary.html" target="_blank" rel="noopener noreferrer">Open Glossary</a>
+              </p>
+            </section>
+
+            <section class="panel">
+              <h3>Architecture</h3>
+              <p>
+                A compact reference for the Set Transformer block names, shapes, and where equivariance becomes invariance.
+              </p>
+              <p>
+                <a class="button secondary" href="reference/set-transformer-architecture.html" target="_blank" rel="noopener noreferrer">Open Architecture</a>
+              </p>
+            </section>
+          </div>
+        </section>
+
+        <section aria-labelledby="path">
+          <h2 id="path">Current Path</h2>
+          <table>
+            <caption>The course sequence so far.</caption>
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Question</th>
+                <th>Durable answer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1</strong></td>
+                <td>Why is flow cytometry set data?</td>
+                <td>Cell-event row order is arbitrary, so a sample-level RBC prediction should not depend on row order.</td>
+              </tr>
+              <tr>
+                <td><strong>2</strong></td>
+                <td>How does Set Transformer use that symmetry?</td>
+                <td>Encoder attention keeps one context-aware representation per cell; PMA pools encoded cells into learned sample summaries.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </article>
+    </main>
+  </body>
+</html>
