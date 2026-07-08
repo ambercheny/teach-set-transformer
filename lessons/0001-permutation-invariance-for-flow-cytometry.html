@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Permutation Invariance For Flow Cytometry</title>
+    <link rel="stylesheet" href="../assets/course.css">
+    <script src="../assets/permutation-demo.js" defer></script>
+    <script src="../assets/quiz.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <article>
+        <header>
+          <p class="kicker">Lesson 1</p>
+          <h1>Permutation Invariance For Flow Cytometry</h1>
+          <p class="lede">
+            Learn the one symmetry that makes set models useful for flow cytometry: reordering cell-event rows should not change a sample-level prediction.
+          </p>
+        </header>
+
+        <section aria-labelledby="win">
+          <h2 id="win">The Win</h2>
+          <p>
+            By the end of this lesson, you should be able to classify a function as permutation invariant, permutation equivariant, or order-sensitive.
+            You should also be able to explain why hematocrit prediction from many RBC event rows is a set-input problem.
+          </p>
+
+          <div class="callout">
+            <strong>Vocabulary checkpoint</strong>
+            Keep <a href="../reference/glossary.html">the glossary</a> open if the words set, event, sample, invariant, or equivariant feel unstable.
+          </div>
+        </section>
+
+        <section aria-labelledby="set-not-sequence">
+          <h2 id="set-not-sequence">Set, Not Sequence</h2>
+          <p>
+            A sequence has meaningful order. A sentence changes when its words are shuffled. A time series changes when its time points are shuffled.
+          </p>
+          <p>
+            A set has no meaningful order. If the same cell-event rows are listed in a different order, the blood sample is still the same sample.
+            For a sample-level RBC prediction, row order should not decide the answer.
+          </p>
+
+          <table>
+            <caption>Two views of the same kind of table.</caption>
+            <thead>
+              <tr>
+                <th>Input type</th>
+                <th>Order means something?</th>
+                <th>Model should care about row order?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Sentence tokens</td>
+                <td>Yes</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>Time series measurements</td>
+                <td>Yes</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>Retained RBC event rows from one sample</td>
+                <td>No</td>
+                <td>No, not for a sample-level prediction</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section aria-labelledby="event">
+          <h2 id="event">What An Event Represents</h2>
+          <p>
+            A flow cytometry event is one detected particle measurement. In this teaching workspace, after preprocessing, one retained event is treated as one cell row.
+          </p>
+          <p>
+            For the Flow-RBC framing in Zhang 2022, the useful abstraction is simple: one sample contains many RBC-level rows, each row has measured features, and the target is a sample-level hematocrit value.
+          </p>
+
+          <div class="callout warning">
+            <strong>Scope limit</strong>
+            This lesson does not teach instrument physics, gating, debris removal, or doublet handling. It only teaches the set abstraction needed for Set Transformer.
+          </div>
+        </section>
+
+        <section aria-labelledby="three-behaviors">
+          <h2 id="three-behaviors">Three Behaviors Under Shuffling</h2>
+
+          <div class="grid">
+            <section class="panel">
+              <h3>Invariant</h3>
+              <p>The output stays exactly the same when input rows are reordered.</p>
+              <p class="formula">f([a, b, c]) = f([c, a, b])</p>
+            </section>
+
+            <section class="panel">
+              <h3>Equivariant</h3>
+              <p>The output rows reorder in the same way as the input rows.</p>
+              <p class="formula">g([a, b, c]) = [A, B, C]<br>g([c, a, b]) = [C, A, B]</p>
+            </section>
+
+            <section class="panel">
+              <h3>Order-sensitive</h3>
+              <p>The output changes just because the rows were listed in a different order.</p>
+              <p class="formula">r([a, b, c]) != r([c, a, b])</p>
+            </section>
+          </div>
+        </section>
+
+        <section aria-labelledby="demo">
+          <h2 id="demo">Try It: Reorder The Same Events</h2>
+          <p>
+            Shuffle or rotate the synthetic event rows below. The invariant sample summary should stay fixed because it ignores row order.
+            The event-level scores should move with their event rows because they are equivariant.
+          </p>
+
+          <div class="exercise" data-permutation-demo></div>
+        </section>
+
+        <section aria-labelledby="deep-sets">
+          <h2 id="deep-sets">The Baseline: Deep Sets</h2>
+          <p>
+            Lee 2019 presents the standard pooling pattern for set-input models: encode each element, pool across elements, then decode the pooled representation.
+          </p>
+
+          <p class="formula">prediction = decoder(pool(encoder(each event row)))</p>
+
+          <p>
+            This gives the right symmetry for sample-level prediction: after pooling, the final answer does not depend on row order.
+            The limitation is that simple pooling can lose information about interactions between event rows.
+            Set Transformer addresses that limitation by using attention, which is the topic of Lesson 2.
+          </p>
+        </section>
+
+        <section aria-labelledby="quiz">
+          <h2 id="quiz">Check: Classify The Function</h2>
+          <p>
+            Pick the behavior that best describes each function. Answer from memory first; then use the feedback to correct your model.
+          </p>
+
+          <div data-quiz data-options="Invariant|Equivariant|Order-sensitive">
+            <div data-quiz-mount></div>
+            <script type="application/json">
+              [
+                {
+                  "prompt": "mean(volume for every event row in one sample)",
+                  "answer": "Invariant",
+                  "explanation": "A mean over the same rows stays the same after row order changes."
+                },
+                {
+                  "prompt": "apply the same small neural network to every event row independently",
+                  "answer": "Equivariant",
+                  "explanation": "Each output remains attached to its input row, so outputs reorder when inputs reorder."
+                },
+                {
+                  "prompt": "use the first row as more important because it appears first",
+                  "answer": "Order-sensitive",
+                  "explanation": "The result can change when a different event row becomes first."
+                },
+                {
+                  "prompt": "predict hematocrit from the whole set of retained RBC event rows",
+                  "answer": "Invariant",
+                  "explanation": "The target is sample-level, so reordering rows should not change the prediction."
+                }
+              ]
+            </script>
+          </div>
+        </section>
+
+        <section aria-labelledby="final-check">
+          <h2 id="final-check">Final Check</h2>
+          <div class="exercise">
+            <h3>Say this without looking</h3>
+            <p>
+              A sample-level model for RBC event rows should be permutation invariant because the same blood sample is represented by the same set of events even if the rows are listed in a different order.
+            </p>
+            <p>
+              An event-level encoder can be permutation equivariant because it keeps one representation per event, and those representations should reorder with the input rows.
+            </p>
+          </div>
+        </section>
+
+        <section aria-labelledby="next">
+          <h2 id="next">Next</h2>
+          <p>
+            In Lesson 2, you will learn how Set Transformer uses attention blocks to create equivariant event representations, then uses learned pooling to produce an invariant sample-level output.
+          </p>
+        </section>
+
+        <p class="source-note">
+          Primary sources: Lee et al. 2019, Sections 1 and 2.1, for set-input motivation, permutation invariance, permutation equivariance, and pooling architectures; Zhang et al. 2022, Sections 1, 2, and 5, for Flow-RBC task framing and hematocrit prediction from RBC measurements. Ask the agent follow-up questions if any term or distinction is unclear.
+        </p>
+      </article>
+    </main>
+  </body>
+</html>
