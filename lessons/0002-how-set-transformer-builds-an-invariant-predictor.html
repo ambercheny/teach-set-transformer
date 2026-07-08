@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>How Set Transformer Builds An Invariant Predictor</title>
+    <link rel="stylesheet" href="../assets/course.css">
+    <script src="../assets/quiz.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <article>
+        <header>
+          <p class="kicker">Lesson 2</p>
+          <h1>How Set Transformer Builds An Invariant Predictor</h1>
+          <p class="lede">
+            Learn how attention blocks keep event-level representations equivariant, then use learned pooling to produce one invariant sample-level prediction.
+          </p>
+        </header>
+
+        <!-- Orient the learner to the one architecture skill in this lesson. -->
+        <section aria-labelledby="win">
+          <h2 id="win">The Win</h2>
+          <p>
+            By the end of this lesson, you should be able to trace a set of cell rows through Set Transformer and name where equivariance and invariance happen.
+          </p>
+
+          <div class="callout">
+            <strong>Reference checkpoint</strong>
+            Keep the <a href="../reference/set-transformer-architecture.html" target="_blank">architecture reference</a> and <a href="../reference/glossary.html" target="_blank">glossary</a> open. This lesson uses the same block names: MAB, SAB, ISAB, and PMA.
+          </div>
+        </section>
+
+        <!-- Connect Lesson 1's Deep Sets baseline to Set Transformer. -->
+        <section aria-labelledby="from-deep-sets">
+          <h2 id="from-deep-sets">From Deep Sets To Set Transformer</h2>
+          <p>
+            Deep Sets gives the right symmetry by encoding each row, pooling across rows, and decoding the pooled vector. Set Transformer keeps the same goal but changes the middle: it uses attention in addition to pooling so each row representation can depend on other rows before pooling.
+          </p>
+          <p class="formula">
+            Deep Sets: row encoder -> fixed pooling -> prediction
+          </p>
+          <p class="formula">
+            Set Transformer: attention encoder -> learned attention pooling -> prediction
+          </p>
+          <p>
+            This matters for flow cytometry because a sample is not just a bag of independent rows. The distribution of rows, rare subpopulations, and relationships among measurements can all matter for a sample-level target.
+          </p>
+        </section>
+
+        <!-- Teach attention only to the level needed for the blocks. -->
+        <section aria-labelledby="attention">
+          <h2 id="attention">Attention</h2>
+          <p>
+            Attention is a weighted lookup. The model makes query, key, and value projections from the input. A query is compared with keys to produce attention weights, and those weights are used to combine values.
+          </p>
+
+          <div class="grid">
+            <section class="panel">
+              <h3>Query</h3>
+              <p>The vector asking what information is relevant.</p>
+            </section>
+            <section class="panel">
+              <h3>Key</h3>
+              <p>The vector being compared against the query.</p>
+            </section>
+            <section class="panel">
+              <h3>Value</h3>
+              <p>The vector being averaged after attention weights are computed.</p>
+            </section>
+          </div>
+
+          <p class="formula">
+            attention output = weighted sum of values
+          </p>
+
+          <div class="attention-diagram" role="img" aria-label="Attention diagram showing query cells as rows, key cells as columns, a score matrix between them, and scores weighting value vectors.">
+            <section class="attention-step">
+              <h3>0. Project the same input into Q, K, and V</h3>
+              <p class="source-note">
+                The input matrix is not copied as three fixed datasets. The same input is passed through three learned linear projections: <code>Linear_Q</code>, <code>Linear_K</code>, and <code>Linear_V</code>.
+              </p>
+              <div class="qkv-flow">
+                <section class="feature-matrix">
+                  <h3>Input X (n, d)</h3>
+                  <p class="source-note">Rows (n) are cells; this example shows d = 3 feature columns.</p>
+                  <div class="matrix-grid three-feature-grid" aria-hidden="true">
+                    <div class="matrix-cell heading">cell</div>
+                    <div class="matrix-cell heading">f1</div>
+                    <div class="matrix-cell heading">f2</div>
+                    <div class="matrix-cell heading">f3</div>
+
+                    <div class="matrix-cell row-label">c1</div>
+                    <div class="matrix-cell">82</div>
+                    <div class="matrix-cell">28</div>
+                    <div class="matrix-cell">41</div>
+
+                    <div class="matrix-cell row-label">c2</div>
+                    <div class="matrix-cell">91</div>
+                    <div class="matrix-cell">32</div>
+                    <div class="matrix-cell">44</div>
+                  </div>
+                </section>
+
+                <div class="pooling-arrow" aria-hidden="true">
+                  <span>learned linear layers</span>
+                  <span class="arrow">-></span>
+                </div>
+
+                <section class="qkv-branches">
+                  <div class="qkv-branch">
+                    <strong>Q = Linear_Q(X)</strong>
+                    Query vectors: a learned linear projection of input X; each query represents what a cell asks when comparing itself to other cells.
+                  </div>
+                  <div class="qkv-branch">
+                    <strong>K = Linear_K(X)</strong>
+                    Key vectors: a learned linear projection of input X; each key is what a cell offers for comparison.
+                  </div>
+                  <div class="qkv-branch">
+                    <strong>V = Linear_V(X)</strong>
+                    Value vectors: a learned linear projection of input X; these are the vectors combined after attention weights are computed.
+                  </div>
+                </section>
+              </div>
+            </section>
+
+            <section class="attention-step">
+              <h3>1. Compare each query cell with each key cell</h3>
+              <p class="source-note">Rows are queries <code>Q</code>; columns are keys <code>K</code>. Each cell in the table is a similarity score.</p>
+              <div class="attention-score-grid" aria-hidden="true">
+                <div class="matrix-cell heading">Q \ K</div>
+                <div class="matrix-cell heading">cell 1</div>
+                <div class="matrix-cell heading">cell 2</div>
+                <div class="matrix-cell heading">cell 3</div>
+                <div class="matrix-cell heading">cell 4</div>
+
+                <div class="matrix-cell row-label">cell 1</div>
+                <div class="matrix-cell">1</div>
+                <div class="matrix-cell">.10</div>
+                <div class="matrix-cell">.05</div>
+                <div class="matrix-cell">.05</div>
+
+                <div class="matrix-cell row-label">cell 2</div>
+                <div class="matrix-cell">.20</div>
+                <div class="matrix-cell">1</div>
+                <div class="matrix-cell">.15</div>
+                <div class="matrix-cell">.10</div>
+
+                <div class="matrix-cell row-label">cell 3</div>
+                <div class="matrix-cell">.05</div>
+                <div class="matrix-cell">.25</div>
+                <div class="matrix-cell">1</div>
+                <div class="matrix-cell">.10</div>
+
+                <div class="matrix-cell row-label">cell 4</div>
+                <div class="matrix-cell">.10</div>
+                <div class="matrix-cell">.10</div>
+                <div class="matrix-cell">.20</div>
+                <div class="matrix-cell">1</div>
+              </div>
+            </section>
+
+            <div class="attention-flow">
+              <section class="feature-matrix">
+                <h3>2. Use scores as weights</h3>
+                <p>
+                  After softmax, each query row has weights over all value rows. A high weight means that value contributes more to that query's updated representation. In other words, a high weight means the two cells are highly correlated.
+                </p>
+              </section>
+
+              <div class="pooling-arrow" aria-hidden="true">
+                <span>weights x V</span>
+                <span class="arrow">-></span>
+                <span>updated rows</span>
+              </div>
+
+              <section class="pooled-vector">
+                <h3>3. Produce updated cell vectors</h3>
+                <p>
+                  The result is one importance score vector per cell, representing the relevance between the cell and all other cells. That is why is permutation equivariant.
+                </p>
+              </section>
+            </div>
+          </div>
+
+          <p>
+            In Set Transformer, attention is used twice: first to let rows interact with other rows, and later to pool the whole set into one or more sample-level outputs.
+          </p>
+        </section>
+
+        <!-- Main architecture trace: this is the durable mental model. -->
+        <section aria-labelledby="trace">
+          <h2 id="trace">Set Transformer Architecture</h2>
+          <p>
+            Imagine one blood sample represented by <code>n</code> cell rows. Each row is a cell, and each column is a measured cell feature.
+          </p>
+          <p>
+            The encoder output is not an importance score. It is a context-aware representation for each cell: each row has been updated using information from other rows. PMA then reduces the set of encoded rows into <code>k</code> learned summary tokens. The value of <code>k</code> is the number of summary tokens, not necessarily the number of outcome classes.
+          </p>
+
+
+          <div class="pooling-diagram architecture-strip" role="img" aria-label="Set Transformer architecture diagram: n by d input, QKV projection to n by d, encoder to n by h, PMA decoder to k by h, and linear head to k by target.">
+            <caption>One sample through Set Transformer.</caption>
+
+            <div class="architecture-flow" aria-hidden="true">
+              
+              <div class="matrix-sketch tall">
+                <div class="col-label">d</div>
+                <div class="row-label">n</div>
+                <div class="matrix-box">
+                  <span class="matrix-line"></span>
+                  <span class="matrix-line"></span>
+                  <span class="matrix-line"></span>
+                </div>
+                <div class="shape-label">input<br><code>n x d</code></div>
+              </div>
+              <div class="arch-step">
+                <span>QKV projection</span>
+                <span class="arch-arrow">-></span>
+              </div>
+
+              <div class="matrix-sketch tall">
+                <div class="col-label">d</div>
+                <div class="row-label">n</div>
+                <div class="matrix-box projected">
+                  <span class="matrix-line"></span>
+                  <span class="matrix-line"></span>
+                  <span class="matrix-line"></span>
+                </div>
+                <div class="shape-label">Q, K, V<br><code>n x d</code></div>
+              </div>
+
+              <div class="arch-step">
+                <span>encoder (first attention between cells happen)</span>
+                <span class="arch-arrow">-></span>
+              </div>
+
+              <div class="matrix-sketch tall wide">
+                <div class="col-label">h</div>
+                <div class="row-label">n</div>
+                <div class="matrix-box encoded">
+                  <span class="matrix-line"></span>
+                  <span class="matrix-line"></span>
+                  <span class="matrix-line"></span>
+                </div>
+                <div class="shape-label">encoded cells<br><code>n x h</code></div>
+              </div>
+
+              <div class="arch-step">
+                <span>PMA decoder (second attention between encoded cells)</span>
+                <span class="arch-arrow">-></span>
+              </div>
+
+              <div class="matrix-sketch short wide">
+                <div class="col-label">h</div>
+                <div class="row-label">k</div>
+                <div class="matrix-box pooled">
+                  <span class="matrix-line"></span>
+                  <span class="matrix-line"></span>
+                </div>
+                <div class="shape-label">summaries<br><code>k x h</code></div>
+              </div>
+
+              <div class="arch-step">
+                <span>linear</span>
+                <span class="arch-arrow">-></span>
+              </div>
+
+              <div class="matrix-sketch short target">
+                <div class="col-label">target</div>
+                <div class="row-label">k</div>
+                <div class="matrix-box output">
+                  <span class="matrix-line"></span>
+                  <span class="matrix-line"></span>
+                </div>
+                <div class="shape-label">prediction<br><code>k x target</code></div>
+              </div>
+            </div>
+            <p class="dimension-note">
+              The tall boxes keep one row per input cell. PMA changes the row count from <code>n</code> cells to <code>k</code> learned summaries, so the <code>k x h</code> and <code>k x target</code> boxes are shorter.
+            </p>
+          </div>
+
+          <p class="dimension-note">
+              For example, predict a sample to develop an outcome or not, a binary outcome, we set k=1 and target =1.
+          </p>
+
+          <table>
+            <caption>Reading the dimensions again</caption>
+            <thead>
+              <tr>
+                <th>Stage</th>
+                <th>Result shape</th>
+                <th>What it means</th>
+                <th>Permutation behavior</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Input set</strong></td>
+                <td><code>n x d</code></td>
+                <td>One row per cell/event.</td>
+                <td>Rows have no canonical order.</td>
+              </tr>
+              <tr>
+                <td><strong>SAB or ISAB encoder</strong></td>
+                <td><code>n x d</code></td>
+                <td>One context-aware representation per row, resulted from attention mechanism</td>
+                <td>Equivariant: output rows reorder with input rows.</td>
+              </tr>
+              <tr>
+                <td><strong>PMA decoder</strong></td>
+                <td><code>k x d</code></td>
+                <td><code>k</code> learned sample summaries.</td>
+                <td>Invariant to input row order. For example, for one health outcome prediction, k=1.</td>
+              </tr>
+              <tr>
+                <td><strong>Prediction head</strong></td>
+                <td><code>k x target</code></td>
+                <td>Sample-level prediction, such as hematocrit.</td>
+                <td>Still invariant to input row order. For example, for one health outcome prediction, target=1.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Explain each block in the shortest useful form. -->
+        <section aria-labelledby="blocks">
+          <h2 id="blocks">The Four Block Names</h2>
+
+          <div class="grid">
+            <section class="panel">
+              <h3>MAB</h3>
+              <p>Multihead Attention Block. The reusable building block.</p>
+            </section>
+            <section class="panel">
+              <h3>SAB</h3>
+              <p>Set Attention Block. Self-attention over all rows: <code>SAB(X) = MAB(X, X)</code>.</p>
+            </section>
+            <section class="panel">
+              <h3>ISAB</h3>
+              <p>Induced Set Attention Block. Uses <code>m</code> learned inducing points to reduce cost from <code>O(n^2)</code> to <code>O(nm)</code>.</p>
+            </section>
+            <section class="panel">
+              <h3>PMA</h3>
+              <p>Pooling by Multihead Attention. Learned seed vectors query the encoded set to produce sample summaries.</p>
+            </section>
+          </div>
+        </section>
+
+        <!-- Make the symmetry distinction explicit. -->
+        <section aria-labelledby="where">
+          <h2 id="where">Where Equivariance Becomes Invariance</h2>
+          <p>
+            SAB and ISAB preserve the row structure. If you shuffle input rows, the encoded output rows shuffle the same way. This is exactly what you want while the model is still representing each event separately.
+          </p>
+          <p>
+            PMA is different. PMA uses learned seed vectors to ask for a summary of the whole encoded set. That summary does not have one row per input event, so it can become a sample-level representation whose value should not depend on row order.
+          </p>
+
+          <div class="callout">
+            <strong>Practical rule</strong>
+            Use equivariant blocks while you still need one representation per event. Use invariant pooling when you need one representation for the whole sample.
+          </div>
+        </section>
+
+        <!-- Bridge to the RBC use case and Zhang 2022. -->
+        <section aria-labelledby="rbc">
+          <h2 id="rbc">Why This Fits RBC Prediction</h2>
+          <p>
+            In the Flow-RBC framing from <a href="https://arxiv.org/abs/2206.11925" target="_blank" rel="noopener noreferrer">Zhang 2022</a>, the input is a set of RBC-level measurements and the target is sample-level hematocrit. That makes row order irrelevant, but the distribution of cell measurements can still matter.
+          </p>
+          <p>
+            Set Transformer fits this shape: the encoder can learn event representations that account for other events, and PMA can aggregate them into one sample representation for the prediction head.
+          </p>
+          <p>
+            Zhang 2022 then asks a deeper training question: if we make permutation-invariant models deeper, how do we avoid gradient and normalization problems? That is where clean-path residual connections and set norm enter. Those details are beyond the core Set Transformer trace, but they matter when evaluating whether the architecture is appropriate for real-valued cytometry data.
+          </p>
+        </section>
+
+        <!-- Retrieval practice: identify block behavior. -->
+        <section aria-labelledby="quiz">
+          <h2 id="quiz">Check: Identify The Block</h2>
+          <p>
+            Choose the best classification for each block or operation.
+          </p>
+
+          <div data-quiz data-options="Equivariant|Invariant|Neither">
+            <div data-quiz-mount></div>
+            <script type="application/json">
+              [
+                {
+                  "prompt": "SAB encoder block producing one output row per input row",
+                  "answer": "Equivariant",
+                  "explanation": "If the input rows are shuffled, SAB output rows shuffle the same way."
+                },
+                {
+                  "prompt": "ISAB encoder block producing one output row per input row",
+                  "answer": "Equivariant",
+                  "explanation": "ISAB also preserves one representation per input row, while reducing attention cost."
+                },
+                {
+                  "prompt": "PMA with one seed vector producing one sample representation",
+                  "answer": "Invariant",
+                  "explanation": "The PMA output summarizes the set and should not depend on the input row order."
+                },
+                {
+                  "prompt": "A prediction head applied after PMA to predict hematocrit",
+                  "answer": "Invariant",
+                  "explanation": "The prediction belongs to the whole sample, so it should remain unchanged under row shuffling."
+                }
+              ]
+            </script>
+          </div>
+        </section>
+
+        <!-- End with the concise explanation the learner should be able to produce. -->
+        <section aria-labelledby="final-check">
+          <h2 id="final-check">Final Check</h2>
+          <div class="exercise">
+            <h3>Say this without looking</h3>
+            <p>
+              Set Transformer first uses SAB or ISAB blocks to build permutation-equivariant event representations. Then PMA uses learned seed vectors to pool those event representations into a permutation-invariant sample representation. A final prediction head can map that sample representation to hematocrit or another sample-level target.
+            </p>
+          </div>
+        </section>
+
+        <p class="source-note">
+          Primary sources: <a href="https://arxiv.org/abs/1810.00825" target="_blank" rel="noopener noreferrer">Lee et al. 2019</a>, Sections 2.2, 3.1, 3.2, and 3.3, for attention, MAB, SAB, ISAB, PMA, and the Set Transformer encoder-decoder structure; <a href="https://arxiv.org/abs/2206.11925" target="_blank" rel="noopener noreferrer">Zhang et al. 2022</a>, Sections 1, 2, 3, 4, and 5, for Flow-RBC, gradient issues, clean paths, and set norm. Ask the agent follow-up questions if any block or shape is unclear.
+        </p>
+      </article>
+    </main>
+  </body>
+</html>

@@ -431,6 +431,14 @@ button.secondary,
   margin-top: 12px;
 }
 
+.matrix-grid.three-feature-grid {
+  grid-template-columns: 64px repeat(3, minmax(44px, 1fr));
+}
+
+.matrix-grid.hidden-grid {
+  grid-template-columns: 64px repeat(5, minmax(38px, 1fr));
+}
+
 .matrix-cell {
   background: var(--code);
   border: 1px solid var(--rule);
@@ -473,10 +481,191 @@ button.secondary,
   margin-top: 12px;
 }
 
+.summary-grid {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 82px repeat(5, minmax(38px, 1fr));
+  margin-top: 12px;
+}
+
 .dimension-note {
   color: var(--muted);
   font-size: 0.92rem;
   margin-top: 12px;
+}
+
+.architecture-strip {
+  overflow-x: auto;
+}
+
+.architecture-flow {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  min-width: 860px;
+}
+
+.matrix-sketch {
+  display: grid;
+  gap: 4px 6px;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto auto;
+  justify-items: center;
+}
+
+.matrix-sketch .col-label {
+  color: var(--accent-dark);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-weight: 800;
+  grid-column: 2;
+}
+
+.matrix-sketch .row-label {
+  align-self: center;
+  color: var(--accent-dark);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-weight: 800;
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.matrix-box {
+  background: linear-gradient(180deg, #fffef9, #f0eee6);
+  border: 2px solid var(--accent-dark);
+  border-radius: 6px;
+  display: grid;
+  gap: 8px;
+  grid-column: 2;
+  grid-row: 2;
+  padding: 12px 10px;
+  position: relative;
+  width: 54px;
+}
+
+.matrix-sketch.tall .matrix-box {
+  height: 96px;
+}
+
+.matrix-sketch.short .matrix-box {
+  height: 52px;
+}
+
+.matrix-sketch.wide .matrix-box {
+  width: 76px;
+}
+
+.matrix-sketch.target .matrix-box {
+  width: 68px;
+}
+
+.matrix-box.projected {
+  border-color: #8a5a13;
+}
+
+.matrix-box.encoded {
+  border-color: #1f6f78;
+}
+
+.matrix-box.pooled {
+  border-color: #20724f;
+}
+
+.matrix-box.output {
+  border-color: #9b2f2f;
+}
+
+.matrix-line {
+  align-self: center;
+  background: rgba(31, 35, 40, 0.22);
+  display: block;
+  height: 2px;
+  width: 100%;
+}
+
+.shape-label {
+  color: var(--muted);
+  font-size: 0.82rem;
+  grid-column: 2;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.shape-label code {
+  font-size: 0.9em;
+}
+
+.arch-step {
+  align-items: center;
+  color: var(--accent-dark);
+  display: flex;
+  flex-direction: column;
+  font-size: 0.82rem;
+  font-weight: 800;
+  gap: 2px;
+  min-width: 72px;
+  text-align: center;
+}
+
+.arch-arrow {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.attention-diagram {
+  background: #f9f8f1;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  margin: 24px 0;
+  padding: 18px;
+}
+
+.qkv-flow {
+  align-items: stretch;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(220px, 1fr) auto minmax(280px, 1.4fr);
+  margin-top: 12px;
+}
+
+.qkv-branches {
+  display: grid;
+  gap: 10px;
+}
+
+.qkv-branch {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.qkv-branch strong {
+  color: var(--accent-dark);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.attention-score-grid {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 72px repeat(4, minmax(48px, 1fr));
+  margin-top: 12px;
+}
+
+.attention-step {
+  margin-top: 18px;
+}
+
+.attention-step h3 {
+  margin-top: 0;
+}
+
+.attention-flow {
+  align-items: center;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 1fr);
+  margin-top: 18px;
 }
 
 @media (max-width: 640px) {
@@ -514,6 +703,39 @@ button.secondary,
 
   .matrix-grid {
     grid-template-columns: 52px repeat(4, minmax(38px, 1fr));
+  }
+
+  .matrix-grid.three-feature-grid {
+    grid-template-columns: 52px repeat(3, minmax(38px, 1fr));
+  }
+
+  .matrix-grid.hidden-grid,
+  .summary-grid {
+    grid-template-columns: 52px repeat(5, minmax(34px, 1fr));
+  }
+
+  .attention-score-grid {
+    grid-template-columns: 58px repeat(4, minmax(38px, 1fr));
+  }
+
+  .architecture-flow {
+    min-width: 760px;
+  }
+
+  .matrix-sketch.tall .matrix-box {
+    height: 84px;
+  }
+
+  .matrix-sketch.short .matrix-box {
+    height: 46px;
+  }
+
+  .attention-flow {
+    grid-template-columns: 1fr;
+  }
+
+  .qkv-flow {
+    grid-template-columns: 1fr;
   }
 }
 
