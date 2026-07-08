@@ -76,7 +76,7 @@
 
           <div class="attention-diagram" role="img" aria-label="Attention diagram showing query cells as rows, key cells as columns, a score matrix between them, and scores weighting value vectors.">
             <section class="attention-step">
-              <h3>0. Project the same input into Q, K, and V</h3>
+              <h3>1. Project the same input into Q, K, and V</h3>
               <p class="source-note">
                 The input matrix is not copied as three fixed datasets. The same input is passed through three learned linear projections: <code>Linear_Q</code>, <code>Linear_K</code>, and <code>Linear_V</code>.
               </p>
@@ -125,7 +125,7 @@
             </section>
 
             <section class="attention-step">
-              <h3>1. Compare each query cell with each key cell</h3>
+              <h3>2. Compare each query cell with each key cell</h3>
               <p class="source-note">Rows are queries <code>Q</code>; columns are keys <code>K</code>. Each cell in the table is a similarity score.</p>
               <div class="attention-score-grid" aria-hidden="true">
                 <div class="matrix-cell heading">Q \ K</div>
@@ -162,7 +162,7 @@
 
             <div class="attention-flow">
               <section class="feature-matrix">
-                <h3>2. Use scores as weights</h3>
+                <h3>3. Use scores as weights</h3>
                 <p>
                   After softmax, each query row has weights over all value rows. A high weight means that value contributes more to that query's updated representation. In other words, a high weight means the two cells are highly correlated.
                 </p>
@@ -175,7 +175,7 @@
               </div>
 
               <section class="pooled-vector">
-                <h3>3. Produce updated cell vectors</h3>
+                <h3>4. Produce updated cell vectors</h3>
                 <p>
                   The result is one importance score vector per cell, representing the relevance between the cell and all other cells. That is why is permutation equivariant.
                 </p>
