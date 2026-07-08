@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Set Transformer Architecture</title>
+    <link rel="stylesheet" href="../assets/course.css">
+  </head>
+  <body>
+    <main>
+      <article>
+        <header>
+          <p class="kicker">Reference</p>
+          <h1>Set Transformer Architecture</h1>
+          <p class="lede">
+            A compact map of the Set Transformer blocks: MAB, SAB, ISAB, PMA, and the point where an equivariant event representation becomes an invariant sample prediction.
+          </p>
+        </header>
+
+        <section aria-labelledby="one-line">
+          <h2 id="one-line">One-Line Shape</h2>
+          <p>
+            Set Transformer follows the same broad pattern as Deep Sets, but replaces simple per-row encoding and fixed pooling with attention-based blocks.
+          </p>
+          <p class="formula">
+            input set X -> encoder(SAB or ISAB) -> event features Z -> decoder(PMA) -> sample prediction
+          </p>
+          <div class="callout">
+            <strong>Memory hook</strong>
+            Encoder blocks keep one output per input event, so they are permutation equivariant. PMA aggregates across events, so the final sample-level output is permutation invariant.
+          </div>
+        </section>
+
+        <section aria-labelledby="blocks">
+          <h2 id="blocks">Block Summary</h2>
+
+          <table>
+            <caption>Set Transformer blocks from Lee 2019.</caption>
+            <thead>
+              <tr>
+                <th>Block</th>
+                <th>Short meaning</th>
+                <th>Input -> output shape</th>
+                <th>Permutation behavior</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>MAB</strong></td>
+                <td>Multihead Attention Block. The reusable attention block used to build SAB, ISAB, and PMA.</td>
+                <td><code>(X, Y) -> rows like X</code></td>
+                <td>Depends on how it is used.</td>
+              </tr>
+              <tr>
+                <td><strong>SAB</strong></td>
+                <td>Set Attention Block. The set attends to itself: <code>SAB(X) = MAB(X, X)</code>.</td>
+                <td><code>n x d -> n x d</code></td>
+                <td>Permutation equivariant.</td>
+              </tr>
+              <tr>
+                <td><strong>ISAB</strong></td>
+                <td>Induced Set Attention Block. The set attends through <code>m</code> learned inducing points.</td>
+                <td><code>n x d -> n x d</code></td>
+                <td>Permutation equivariant.</td>
+              </tr>
+              <tr>
+                <td><strong>PMA</strong></td>
+                <td>Pooling by Multihead Attention. Learned seed vectors query the encoded set.</td>
+                <td><code>n x d -> k x d</code></td>
+                <td>Permutation invariant with respect to the input set.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section aria-labelledby="encoder">
+          <h2 id="encoder">Encoder: Equivariant Event Features</h2>
+          <p>
+            The encoder transforms the input event rows into event-level representations. Lee 2019 uses stacks of either SAB or ISAB blocks.
+          </p>
+          <div class="grid">
+            <section class="panel">
+              <h3>SAB Encoder</h3>
+              <p class="formula">Encoder(X) = SAB(SAB(X))</p>
+              <p>
+                Every event can attend to every other event. This can model interactions between cells, but full self-attention costs <code>O(n^2)</code>.
+              </p>
+            </section>
+
+            <section class="panel">
+              <h3>ISAB Encoder</h3>
+              <p class="formula">Encoder(X) = ISABm(ISABm(X))</p>
+              <p>
+                Events interact through <code>m</code> learned inducing points. This reduces attention cost to <code>O(nm)</code> when <code>m</code> is smaller than <code>n</code>.
+              </p>
+            </section>
+          </div>
+          <p>
+            Both choices output one representation per input event. If the input rows are shuffled, the output rows shuffle the same way. That is permutation equivariance.
+          </p>
+        </section>
+
+        <section aria-labelledby="decoder">
+          <h2 id="decoder">Decoder: Invariant Sample Output</h2>
+          <p>
+            After the encoder, the model has a set of event features <code>Z</code>. PMA uses learned seed vectors as queries to aggregate information from that set.
+          </p>
+          <p class="formula">PMAk(Z) = MAB(S, rFF(Z))</p>
+          <p>
+            For a single sample-level prediction, use <code>k = 1</code>. The output is one learned summary vector for the whole sample. Since the same set of event features produces the same summary regardless of row order, PMA is the point where the architecture becomes permutation invariant.
+          </p>
+        </section>
+
+        <section aria-labelledby="rbc">
+          <h2 id="rbc">How This Maps To RBC Prediction</h2>
+          <table>
+            <caption>Flow cytometry interpretation.</caption>
+            <thead>
+              <tr>
+                <th>Model part</th>
+                <th>RBC interpretation</th>
+                <th>Why it fits set data</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Input X</strong></td>
+                <td>Rows of retained cell/event measurements from one sample.</td>
+                <td>Rows have no canonical order.</td>
+              </tr>
+              <tr>
+                <td><strong>SAB or ISAB encoder</strong></td>
+                <td>Creates one context-aware representation per cell/event row.</td>
+                <td>Event representations reorder with input rows.</td>
+              </tr>
+              <tr>
+                <td><strong>PMA decoder</strong></td>
+                <td>Aggregates event representations into one sample representation.</td>
+                <td>Sample representation should not change when rows are shuffled.</td>
+              </tr>
+              <tr>
+                <td><strong>Final prediction head</strong></td>
+                <td>Maps the sample representation to the sample-level target, such as hematocrit.</td>
+                <td>The target belongs to the whole sample, not one row.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section aria-labelledby="fast-check">
+          <h2 id="fast-check">Fast Check</h2>
+          <div class="exercise">
+            <h3>Answer from memory</h3>
+            <ol>
+              <li>Which blocks are permutation equivariant: SAB, ISAB, or PMA?</li>
+              <li>Which block turns event features into a sample-level representation?</li>
+              <li>Why does ISAB exist if SAB is simpler?</li>
+            </ol>
+            <p><strong>Answers:</strong> SAB and ISAB are equivariant; PMA aggregates into a sample-level representation; ISAB reduces the cost of self-attention from <code>O(n^2)</code> to <code>O(nm)</code>.</p>
+          </div>
+        </section>
+
+        <p class="source-note">
+          Primary source: <a href="https://arxiv.org/abs/1810.00825" target="_blank" rel="noopener noreferrer">Lee et al. 2019</a>, Sections 3.1, 3.2, and 3.3. See also the <a href="glossary.html" target="_blank">glossary</a> for definitions of invariant, equivariant, attention, MAB, SAB, ISAB, and PMA.
+        </p>
+      </article>
+    </main>
+  </body>
+</html>
