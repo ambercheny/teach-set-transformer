@@ -1,10 +1,5 @@
 # Set Transformer Teaching Plan
 
-## TODO
-1. Teach clean paths
-2. Teach set norm for Flow-RBC
-
-
 This workspace is for teaching Set Transformer in the context of unordered flow cytometry cell-event data and RBC prediction.
 
 ## Mission
@@ -15,8 +10,9 @@ See [MISSION.md](MISSION.md).
 
 ## Reference Sources
 
-1. [Lee 2019](<Lee 2019 (Set Transformer).pdf>): the original Set Transformer paper.
-2. [Zhang 2022](<Zhang 2022 (permutation invariance DL and RBC).pdf>): modifies Deep Sets and Set Transformer with clean-path residual connections and set norm to improve training stability for deep permutation-invariant models.
+1. [Zaheer 2017](https://arxiv.org/abs/1703.06114): the Deep Sets paper, which gives the baseline permutation-invariant architecture: encode each element, pool across elements, then decode.
+2. [Lee 2019](https://arxiv.org/abs/1810.00825): the original Set Transformer paper.
+3. [Zhang 2022](https://arxiv.org/abs/2206.11925): modifies Deep Sets and Set Transformer with clean-path residual connections and set norm to improve training stability for deep permutation-invariant models.
     - gradient vanishing and exploding in deep permutation-invariant networks
     - clean-path equivariant residual connections
     - set norm as a normalization method tailored to sets
@@ -65,6 +61,25 @@ Each lesson should:
 4. link to supporting reference documents;
 5. end with a small check that tests durable understanding, not just recognition.
 
+
+## Acknowledgements
+
+This teaching site was developed with assistance from Codex using the
+  [`mattpocock-skills:teach`](https://github.com/mattpocock/skills?tab=readme-ov-file)
+  skill.
+
+The generated lessons, diagrams, and wording were reviewed and revised by the
+author.
+
+## TODO
+1. Teach clean paths
+2. Teach set norm for Flow-RBC
+
+<br>
+<br>
+
+# Below is the teaching plan
+
 ## Lesson 1: Permutation Invariance For Flow Cytometry
 
 Goal: make the learner able to distinguish invariant, equivariant, and order-sensitive functions, and explain why RBC flow cytometry inputs should be modeled as sets.
@@ -91,8 +106,9 @@ Interactive components:
 
 Primary references:
 
-1. Lee 2019, Sections 1 and 2.1.
-2. Zhang 2022, Section 2.
+1. [Zaheer 2017](https://arxiv.org/abs/1703.06114), for the Deep Sets baseline.
+2. [Lee 2019](https://arxiv.org/abs/1810.00825), Sections 1 and 2.1.
+3. [Zhang 2022](https://arxiv.org/abs/2206.11925), Section 2.
 
 ## Lesson 2: How Set Transformer Builds An Invariant Predictor
 
@@ -120,8 +136,8 @@ Interactive components:
 
 Primary references:
 
-1. Lee 2019, Sections 2.2, 3.1, 3.2, and 3.3.
-2. Zhang 2022, Sections 3 and 4.
+1. [Lee 2019](https://arxiv.org/abs/1810.00825), Sections 2.2, 3.1, 3.2, and 3.3.
+2. [Zhang 2022](https://arxiv.org/abs/2206.11925), Sections 3 and 4.
 
 ## Reference Documents To Create
 
