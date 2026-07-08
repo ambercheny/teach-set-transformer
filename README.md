@@ -12,6 +12,10 @@ See [MISSION.md](MISSION.md).
 
 1. [Lee 2019](<Lee 2019 (Set Transformer).pdf>): the original Set Transformer paper.
 2. [Zhang 2022](<Zhang 2022 (permutation invariance DL and RBC).pdf>): modifies Deep Sets and Set Transformer with clean-path residual connections and set norm to improve training stability for deep permutation-invariant models.
+    - gradient vanishing and exploding in deep permutation-invariant networks
+    - clean-path equivariant residual connections
+    - set norm as a normalization method tailored to sets
+        - to avoid layer norm risks for real-valued set elements
 
 ## Learner Background
 
@@ -27,7 +31,7 @@ See [MISSION.md](MISSION.md).
 4. Permutation-equivariant functions.
 5. Sample-level prediction vs event-level representation.
 6. Deep Sets as the baseline architecture for permutation-invariant learning.
-7. Why simple pooling can discard interactions between set elements.
+    - Why simple pooling can discard interactions between set elements.
 8. Attention basics: queries, keys, values, attention weights, and weighted sums.
 9. Set Transformer architecture:
    - Multihead Attention Block (MAB)
@@ -35,14 +39,9 @@ See [MISSION.md](MISSION.md).
    - Induced Set Attention Block (ISAB)
    - Pooling by Multihead Attention (PMA)
 10. How SAB and ISAB preserve permutation equivariance.
+    - Why ISAB reduces attention cost from `O(n^2)` to `O(nm)`.
 11. How PMA produces permutation-invariant outputs.
-12. Why ISAB reduces attention cost from `O(n^2)` to `O(nm)`.
-13. Why Set Transformer is relevant for RBC prediction from flow cytometry data.
-14. Zhang 2022 improvements:
-   - gradient vanishing and exploding in deep permutation-invariant networks
-   - clean-path equivariant residual connections
-   - layer norm risks for real-valued set elements
-   - set norm as a normalization method tailored to sets
+13. Why Set Transformer is relevant for flow cytometry data, such as RBC prediction in Zhang 2022.   
 15. Practical modeling concerns:
    - variable set sizes
    - padding and masking
@@ -69,9 +68,10 @@ Cover:
 
 1. What a set is, compared with a sequence.
 2. What a flow cytometry event represents.
+    - One event usually means one cell. It could also be debris, doublets/aggregates, platelets, noise, or other particles. But in our dataset, one event = one row = one cell.
 3. Why reordering cell events should not change a sample-level RBC prediction.
 4. Permutation invariance: the sample-level output stays the same.
-5. Permutation equivariance: per-event outputs reorder with the input.
+5. Permutation equivariance: per-event/element outputs reorder with the input.
 6. Deep Sets as the simplest invariant baseline: encode each event, pool, then decode.
 7. Why pooling alone may be too weak when event interactions matter.
 
@@ -79,6 +79,9 @@ Interactive components:
 
 1. Reorder a small table of cell events and show that a sample-level invariant summary is unchanged.
 2. Contrast invariant output with equivariant per-event output.
+3. Visualize flow cytometry data types
+    - A table where one row is one cell, and each cell is described by four features/columns.
+    - connect how flow cytometry is a set problem
 3. Quiz: classify toy functions as invariant, equivariant, or neither.
 
 Primary references:
@@ -93,7 +96,7 @@ Goal: make the learner able to explain the Set Transformer encoder-decoder struc
 Cover:
 
 1. Attention intuition before formal notation.
-2. Queries, keys, values, and attention weights.
+    - Queries, keys, values, and attention weights.
 3. MAB as the reusable attention block.
 4. SAB as self-attention over all set elements.
 5. ISAB as a scalable approximation using inducing points.
